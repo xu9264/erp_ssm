@@ -1,0 +1,359 @@
+<div class="easyui-layout" data-options="fit:true">
+    <!-- Begin of toolbar -->
+    <div id="wu-toolbar-emp">
+        <div class="wu-toolbar-button">
+            <a href="#" class="easyui-linkbutton" iconCls="icon-add" onclick="openAdd()" plain="true">添加</a>
+            <a href="#" class="easyui-linkbutton" iconCls="icon-edit" onclick="openEdit()" plain="true">修改</a>
+            <a href="#" class="easyui-linkbutton" iconCls="icon-remove" onclick="remove()" plain="true">删除</a>
+   <!--         <a href="#" class="easyui-linkbutton" iconCls="icon-cancel" onclick="cancel()" plain="true">取消</a>-->
+            <a href="#" class="easyui-linkbutton" iconCls="icon-reload" onclick="reload()" plain="true">刷新</a>
+           <!-- <a href="#" class="easyui-linkbutton" iconCls="icon-print" onclick="openAdd()" plain="true">打印</a>
+            <a href="#" class="easyui-linkbutton" iconCls="icon-help" onclick="openEdit()" plain="true">帮助</a>
+            <a href="#" class="easyui-linkbutton" iconCls="icon-undo" onclick="remove()" plain="true">撤销</a>
+            <a href="#" class="easyui-linkbutton" iconCls="icon-redo" onclick="cancel()" plain="true">重做</a>
+            <a href="#" class="easyui-linkbutton" iconCls="icon-sum" onclick="reload()" plain="true">总计</a>
+            <a href="#" class="easyui-linkbutton" iconCls="icon-back" onclick="reload()" plain="true">返回</a>
+            <a href="#" class="easyui-linkbutton" iconCls="icon-tip" onclick="reload()" plain="true">提示</a>
+            <a href="#" class="easyui-linkbutton" iconCls="icon-save" onclick="reload()" plain="true">保存</a>
+            <a href="#" class="easyui-linkbutton" iconCls="icon-cut" onclick="reload()" plain="true">剪切</a>-->
+        </div>
+        <div class="wu-toolbar-search">
+            <label>姓名：</label><input class="wu-text" id="realName" style="width:100px">
+            <label>账号：</label><input class="wu-text"  id="username" style="width:100px">
+            <label>部门：</label>
+<!--            <input class="easyui-combobox" id="deptName" data-options="valueField:'name',textField:'name',url:'dept/findAll'" value="请选择">-->
+
+            <label>职位：</label><input class="wu-text" style="width:100px">
+            <a href="#" class="easyui-linkbutton" iconCls="icon-search" id="empSearch">开始检索</a>
+            <script>
+                $(function () {
+                    $("#empSearch").click(function () {
+
+                        $("#wu-datagrid-emp").datagrid("load",{
+                           pageNum:$("#wu-datagrid-emp").datagrid('options').pageNumber
+                            ,pageSize:$("#wu-datagrid-emp").datagrid('options').pageSize
+                            ,realName:$("#realName").val()
+                            ,username:$("#username").val()
+                            ,deptName:$("#deptName").val()
+                            ,roleNames:$("#roleNames").val()
+                        });
+
+                    });
+                });
+            </script>
+        </div>
+    </div>
+    <!-- End of toolbar easyui 提供的动态table 通过对json数据的处理自动展示数据以及进行分页 -->
+    <table id="wu-datagrid-emp" class="easyui-datagrid" toolbar="#wu-toolbar-emp"></table>
+</div>
+<!-- Begin of easyui-dialog -->
+<div id="wu-dialog-emp" class="easyui-dialog" data-options="closed:true,iconCls:'icon-save'" style="width:400px; padding:10px;">
+	<form id="wu-form-emp" method="post">
+        <input type="hidden" name="id" class="wu-text"/>
+        <table>
+            <tr>
+                <td width="100" align="right">姓名:</td>
+                <td><input type="text" name="realName" class="wu-text" /></td>
+            </tr>
+            <tr>
+                <td width="100" align="right">账号:</td>
+                <td><input type="text" name="username" class="wu-text" /></td>
+            </tr>
+            <tr>
+                <td width="100" align="right">性别:</td>
+                <td>
+                        <input type="radio" name="gender" value="0"> 男
+                        <input type="radio" name="gender" value="1"> 女
+                </td>
+            </tr>
+            <tr>
+                <td align="right">联系电话:</td>
+                <td><input type="text" name="tel"  class="easyui-validatebox" data-options="required:true,validType:'tel'"/></td>
+            </tr>
+            <tr>
+                <td align="right">邮箱:</td>
+                <td><input type="text" name="email"class="easyui-validatebox" data-options="validType:'email'" /></td>
+            <tr>
+                <td align="right">身份证号:</td>
+                <td><input type="text" name="idCardNo" class="easyui-validatebox" data-options="required:true" /></td>
+            <tr>
+                <td align="right">住址:</td>
+                <td><input type="text" name="address" class="wu-text" /></td>
+            <tr>
+                <td align="right">部门:</td>
+                <td><input id="deptSelect" class="easyui-combobox" name="deptId"
+                data-options="valueField:'id',textField:'name',url:'dept/findAll'"></td>
+            </tr>
+            <tr>
+                <td align="right">职位:</td>
+                <td id="ck_roles">
+            </tr>
+
+
+        </table>
+    </form>
+    <script>
+
+
+
+
+        $(function () {
+            $.ajax({
+                url:'role/findAll',
+                success:function (data) {
+                    console.log(data);
+                    $(data).each(function () {
+                        $('#ck_roles').html(
+                            $('#ck_roles').html()+
+                            "<input type='checkbox' name='roleIds' value='"+this.id+"'>"+"<span>"+this.name+"</span><br>"
+                        );
+                });
+
+
+                }
+            });
+        })
+    </script>
+
+</div>
+<!-- End of easyui-dialog -->
+<script type="text/javascript">
+	/**
+	* Name 添加记录
+	*/
+	function add(){
+		$('#wu-form-emp').form('submit', {
+			url:'emp/add',
+			success:function(data){
+				if(data=='true'){
+					$.messager.alert('信息提示','提交成功！','info',function () {
+                        $('#wu-datagrid-emp').datagrid('reload');
+                    });
+					$('#wu-dialog-emp').dialog('close');
+				}
+				else
+				{
+					$.messager.alert('信息提示','提交失败！','info');
+				}
+			}
+		});
+	}
+	
+	/**
+	* Name 修改记录
+	*/
+	function edit(){
+		$('#wu-form-emp').form('submit', {
+			url:'emp/update',
+			success:function(data){
+				if(data){
+					$.messager.alert('信息提示','修改成功！','info',function () {
+
+                        $('#wu-datagrid-emp').datagrid('reload');
+                    });
+					$('#wu-dialog-emp').dialog('close');
+				}
+				else
+				{
+					$.messager.alert('信息提示','修改失败！','info');
+				}
+			}
+		});
+	}
+	
+	/**
+	* Name 删除记录
+	*/
+	function remove(){
+        var items = $('#wu-datagrid-emp').datagrid('getSelections');
+		if(items.length==0){
+		    return;
+        }
+        $.messager.confirm('信息提示','确定要删除该记录？', function(result){
+			if(result){
+
+				var ids=[];
+				//jaquery的循环方法each 遍历items数组
+				$(items).each(function(){
+					ids.push(this.id);
+				});
+				//alert(ids);return;
+				$.ajax({
+					url:'emp/remove',
+                    traditional:true,
+					data:{ids:ids},
+					success:function(data){
+						if(data){
+							$.messager.alert('信息提示','删除成功！','info',function () {
+                                $('#wu-dialog-emp').datagrid('reload');
+                            });
+						}
+						else
+						{
+							$.messager.alert('信息提示','删除失败！','info');		
+						}
+					}	
+				});
+			}	
+		});
+	}
+	
+	/**
+	* Name 打开添加窗口
+	*/
+	function openAdd(){
+		$('#wu-form-emp').form('clear');
+		$('#wu-dialog-emp').dialog({
+			closed: false,
+			modal:true,
+            title: "添加信息",
+            buttons: [{
+                text: '确定',
+                iconCls: 'icon-ok',
+                handler: add
+            }, {
+                text: '取消',
+                iconCls: 'icon-cancel',
+                handler: function () {
+                    $('#wu-dialog-emp').dialog('close');                    
+                }
+            }]
+        });
+	}
+	
+	/**
+	* Name 打开修改窗口
+	*/
+	function openEdit(){
+	    //清除表单内容
+		$('#wu-form-emp').form('clear');
+		var items = $('#wu-datagrid-emp').datagrid('getSelections');
+
+		if (items.length==0){
+            $.messager.alert('信息提示','请选择需要修改的数据！','warning');
+            return
+        }else if(items.length>1){
+            $.messager.alert('信息提示','一次只能修改一条数据！','warning');
+            return;
+        }
+       // $('#wu-dialog-emp').from('load',item[0]);
+
+		//alert(item.productid);return;
+		$.ajax({
+			url:'emp/findById',
+			data:{id:items[0].id},
+			success:function(data){
+				if(data){
+
+                    $('#wu-form-emp').form('load', data);
+                    var  roleNames=data.roleNames.split(",");
+                    console.log(roleNames)
+                    for (var i=0;i<roleNames.length;i++){
+                        $("span:contains('"+roleNames[i]+"')").prev("input:checkbox").attr("checked","checked");
+                    }
+                    $.ajax({
+                       url:'dept/findAll'
+                        ,success:function (deptData) {
+                          $.each(deptData,function () {
+                              if (this.name==data.deptName){
+                                    $('#deptSelect').combobox('select',this.id);
+                              }
+                          })
+
+                        }
+
+                    });
+				}
+				else{
+					//绑定值
+                    $('#wu-dialog-emp').dialog('close');
+                }
+			}	
+		});
+		$('#wu-dialog-emp').dialog({
+			closed: false,
+			modal:true,
+            title: "修改信息",
+            buttons: [{
+                text: '确定',
+                iconCls: 'icon-ok',
+                handler: edit
+            }, {
+                text: '取消',
+                iconCls: 'icon-cancel',
+                handler: function () {
+                    $('#wu-dialog-emp').dialog('close');                    
+                }
+            }]
+        });
+	}	
+	
+	/**
+	* Name 分页过滤器
+     * data 表格要展示的数据
+	*/
+	function pagerFilter(data){            
+
+		var dg = $(this);//当前表格
+		var opts = dg.datagrid('options');//当前table的属性
+		var pager = dg.datagrid('getPager');//获取当前表格的分页对象
+		pager.pagination({
+            //当页码改变时会触发此事件 pageNum新的页码 pageSize新的每页条数
+			onSelectPage:function(pageNum, pageSize){
+			    //做分页时的请求操作
+				opts.pageNumber = pageNum;
+                opts.pageSize = pageSize;
+				//dg.datagrid('loadData',data);
+                //使用表格自带的方法重载数据
+                dg.datagrid('load',{//自动从数据请求的ajax地址重新加载数据 附带把参数传过去
+                    pageNum:pageNum,
+                    pageSize:pageSize
+                    ,realName:$("#realName").val()
+                    ,username:$("#username").val()
+                    ,deptName:$("#deptName").val()
+                    ,roleNames:$("#roleNames").val()
+                });
+                //更改下面分页的页码
+                pager.pagination('refresh',{pageNumber:pageNum,pageSize:pageSize});
+			}          
+		});
+		return data;       
+	}
+	
+	/**
+	* Name 载入数据
+	*/
+	$('#wu-datagrid-emp').datagrid({
+		url:'emp/page',//请求数据的请求地址--ajax请求地址 easyui返回的数据的标准格式必须含有total和rows
+        //total 是查询的总数，用户分页  rows 是一个json数组，是要展示的数据
+		loadFilter:pagerFilter,		
+		//rownumbers:true,
+		singleSelect:false,
+		pageSize:2,
+        pageList:[1,2,3,4,5],
+		pagination:true,//展示分页栏
+		//multiSort:true,
+		fitColumns:true,
+		fit:true,
+		columns:[[//列属性，指定数据表格的表头
+			{ checkbox:true},//多选框
+            //title就是表格的表头  field就是json对象中的属性名称 必须跟展示的json数据中属性名称一致，否则匹配不到数据
+            { field:'id',title:'员工编号',width:100,sortable:true},
+            { field:'realName',title:'真实姓名',width:100,sortable:true},
+            { field:'username',title:'账号',width:100,sortable:true},
+            { field:'gender',title:'性别',width:50,formatter:function (value,row) {
+                    if(value==0){
+                        return'男';
+                    }else{
+                        return '女'
+                    }
+                }},
+            { field:'tel',title:'联系电话',width:100},
+            { field:'email',title:'邮箱',width:100},
+            { field:'birthDate',title:'生日',width:100},
+            { field:'address',title:'住址',width:100},
+            { field:'roleNames',title:'职位',width:100},
+            { field:'deptName',title:'部门',width:100}
+		]]
+	});
+</script>
